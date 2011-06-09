@@ -201,6 +201,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				COPY_PHASE_STRIP = NO;
+				FRAMEWORK_SEARCH_PATHS = /opt/local/include;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
 				HEADER_SEARCH_PATHS = /opt/local/include;
@@ -209,7 +210,9 @@
 					"$(inherited)",
 					/opt/local/lib,
 				);
+				PRIVATE_HEADERS_FOLDER_PATH = /opt/local/include;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PUBLIC_HEADERS_FOLDER_PATH = /opt/local/include;
 			};
 			name = Debug;
 		};
@@ -219,6 +222,7 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				FRAMEWORK_SEARCH_PATHS = /opt/local/include;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
 				HEADER_SEARCH_PATHS = /opt/local/include;
 				INSTALL_PATH = "@executable_path/../Frameworks";
@@ -226,7 +230,9 @@
 					"$(inherited)",
 					/opt/local/lib,
 				);
+				PRIVATE_HEADERS_FOLDER_PATH = /opt/local/include;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PUBLIC_HEADERS_FOLDER_PATH = /opt/local/include;
 			};
 			name = Release;
 		};
@@ -249,6 +255,7 @@
 				B5056EC1139ED29400137B5D /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

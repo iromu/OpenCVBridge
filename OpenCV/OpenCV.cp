@@ -25,7 +25,6 @@
 #include "OpenCVPriv.h"
 
 using namespace cv;
-
 using namespace std;
 
 #define DRAW_RICH_KEYPOINTS_MODE    0
@@ -42,19 +41,21 @@ Ptr<FeatureDetector> detector;
 Ptr<DescriptorExtractor> descriptorExtractor;
 Ptr<DescriptorMatcher> descriptorMatcher;
 
-vector<KeyPoint> keypoints1;
-Mat descriptors1;
+
 Mat img1;
 
 int mactherFilterType;
 string detectorString;
 string extractorString;
+string algStringCode;
 
+std::vector<KeyPoint> keypoints1;
+Mat descriptors1;
 
 
 void OpenCV::init()
 {    
-    init("FAST","BRIEF");
+    init("SIFT","SIFT");
 };
 
 void OpenCV::init(const char *  d,const char *  e)
@@ -63,15 +64,20 @@ void OpenCV::init(const char *  d,const char *  e)
     detectorString = d;
     extractorString = e;
     
+    std::stringstream algCode;
+    algCode<<d<<"-"<<e;
+    algStringCode = (d == e)?d:algCode.str().c_str();
     
     isWarpPerspective=false;
     //    ransacReprojThreshold=3;
     
-    cout << "< Creating detector, descriptor extractor and descriptor matcher ... ";
-    
-    
+    cout << "< Creating detector";
     detector = FeatureDetector::create( detectorString );
+    
+    cout << "< Creating detector, descriptor extractor";
     descriptorExtractor = DescriptorExtractor::create( extractorString );
+    
+    cout << "< Creating detector, descriptor extractor and descriptor matcher ... ";
     descriptorMatcher = DescriptorMatcher::create( "FlannBased" );
     
     OpenCVPriv *theObj = new OpenCVPriv;
@@ -79,7 +85,7 @@ void OpenCV::init(const char *  d,const char *  e)
     cout << ">" << endl;
     if( detector.empty() || descriptorExtractor.empty() || descriptorMatcher.empty()  )
     {
-        cout << "Can not create detector or descriptor exstractor or descriptor matcher of given types" << endl;
+        cout << "Can not create detector or descriptor extractor or descriptor matcher of given types" << endl;
         //return -1;
     }
     
@@ -245,7 +251,25 @@ void OpenCV::feature_detect(int h, int w, int  samplesPerPixel,  unsigned char *
 {
     
     cout << endl << "< Extracting keypoints from image... " ;
-    Mat img =  Mat(h,w,CV_MAKETYPE(CV_8U,  samplesPerPixel),  bitmapData);
+    Mat img;
+    //filename=0;
+    if (filename) {
+        img=imread(filename);
+        // Mat color_dst;
+        //cvtColor( img, color_dst, CV_GRAY2BGR );
+        namedWindow(winName, CV_WINDOW_NORMAL);
+        setWindowProperty(winName,CV_WND_PROP_ASPECTRATIO,CV_WINDOW_KEEPRATIO);
+        imshow( winName, img );
+    }
+    else{
+        //BUG
+        img =  Mat(h,w,CV_MAKETYPE(CV_8U,  samplesPerPixel),  bitmapData);
+        
+        namedWindow(winName, CV_WINDOW_NORMAL);
+        setWindowProperty(winName,CV_WND_PROP_ASPECTRATIO,CV_WINDOW_KEEPRATIO);
+        imshow( winName, img );
+    }
+    
     img1=img;
     vector<KeyPoint> keypoints;
     keypoints1 = keypoints;
@@ -263,16 +287,79 @@ void OpenCV::feature_detect(int h, int w, int  samplesPerPixel,  unsigned char *
     cout << descriptors1.total() << " descriptors >" << endl;
     if (filename)
     {
-        saveAsciiKeyFile(filename);
-        saveBinaryKeyFile(filename);
+        std::stringstream filepath,filepathKeypoints,filepathDescriptors;
+        filepath << filename << "." << algStringCode << ".xml.gz";
+        //filepathKeypoints << filename << "." << algStringCode << ".keypoints.xml.gz";
+        //filepathDescriptors << filename << "." << algStringCode << ".descriptors.xml.gz";
+        
+        
+        //saveAsciiKeyFile(filename);
+        cv::FileStorage kfs(filepath.str().c_str(), cv::FileStorage::WRITE);
+        if( kfs.isOpened())
+        {
+            //descriptors1.write(dfs);
+            cv::write(kfs, "algorithm", algStringCode);
+            cv::write(kfs, "keypoints", keypoints1);
+            //kfs.release();
+            
+            //cv::FileStorage dfs(filepathDescriptors.str().c_str(), cv::FileStorage::WRITE);
+            //descriptors1.write(dfs);
+            //if( dfs.isOpened())
+            cv::write(kfs, "descriptors", descriptors1);
+        }
+        //dfs.release();
+        kfs.release();
+        //dfs.write(dfs, keypoints1);
+        // saveBinaryKeyFile(filename);
     }
-}
+    //namedWindow(winName, 1);
+    //imshow( winName, descriptors1 );
+};
+
+
+void OpenCV::feature_detect( const char *  filename)
+{
+    cout << endl << "< Extracting keypoints from image " << filename ;
+    
+    Mat img;
+    img=imread(filename);
+    img1=img;
+    
+    vector<KeyPoint> keypoints;
+    keypoints1 = keypoints;
+    
+    detector->detect( img, keypoints1 );
+    
+    cout << keypoints1.size() << " points >" << endl;
+    
+    cout << "< Computing descriptors for keypoints from image... ";
+    
+    Mat descriptors;
+    descriptors1=descriptors;
+    
+    descriptorExtractor->compute( img, keypoints1, descriptors1 );
+    cout << keypoints1.size() << " total points + ";
+    cout << descriptors1.total() << " descriptors >" << endl;
+    
+    std::stringstream output;
+    output << filename << "." << algStringCode << ".xml.gz";
+    cv::FileStorage fs(output.str().c_str(), FileStorage::WRITE);
+    if( fs.isOpened())
+    {
+        cv::write(fs, "algorithm", algStringCode);
+        cv::write(fs, "keypoints", keypoints1);
+        cv::write(fs, "descriptors", descriptors1);
+    }
+    fs.release();
+};
+
+
 
 
 void OpenCV::saveAsciiKeyFile(const char *  filename)
 {	
 	std::stringstream filepath;
-	filepath << filename << "." << detectorString << "." << extractorString << ".key.txt";
+	filepath << filename << "." << algStringCode << ".key.txt";
     
 	std::ofstream output(filepath.str().c_str());
 	if (output.is_open())
@@ -292,8 +379,9 @@ void OpenCV::saveAsciiKeyFile(const char *  filename)
             //in y, x, scale, orientation order
 			output << std::setprecision(2) << keypoints1[i].pt.y << " " << std::setprecision(2) << keypoints1[i].pt.x << " " << std::setprecision(3) << keypoints1[i].size << " " << std::setprecision(3) <<  keypoints1[i].angle << std::endl;
             
+            // BUG
             uchar* descriptor = descriptors1.row(i).data;
-			for (int k=0; k<descriptors1.row(0).total(); ++k, ++descriptor)
+			for (int k=0; k<descriptors1.row(i).total(); ++k, ++descriptor)
             {
 				//output << ((unsigned int)floor(0.5+512.0f*(*descriptor)))<< " ";
                 output << ((unsigned int)floor(0.5+(*descriptor)))<< " ";
@@ -305,49 +393,66 @@ void OpenCV::saveAsciiKeyFile(const char *  filename)
         }
     }
 	output.close();
-}
+};
+
 void OpenCV::saveBinaryKeyFile(const char *  filename)
 {
-	std::stringstream filepath;
-	filepath << filename << "." << detectorString << "." << extractorString << ".key.bin";
-    
-    
-	std::ofstream output;
-	output.open(filepath.str().c_str(), std::ios::out | std::ios::binary);
+	std::stringstream filepath,filepathKeypoints,filepathDescriptors;
+	filepath << filename << "." << algStringCode << ".key.bin";
+    filepathKeypoints << filename << "." << algStringCode << ".keypoints";
+    filepathDescriptors << filename << "." << algStringCode << ".descriptors";
     
     cout << "< Saving file " << filepath.str().c_str()  << endl;
     
-	if (output.is_open())
-    {
-        
-		int nbFeature = (int)keypoints1.size();//(int)mFeatureInfos[fileIndex].points.size();
-		output.write((char*)&nbFeature, sizeof(nbFeature));
-        
-        // FeatureInfo featureInfo = mFeatureInfos[fileIndex];
-        for (int i=0; i<nbFeature; ++i)
-        {			
-            float x           = keypoints1[i].pt.x;
-            float y           = keypoints1[i].pt.y;
-            float scale       = keypoints1[i].size;
-            float orientation = keypoints1[i].angle;
-            
-            uchar* descriptor = descriptors1.row(i).data;
-            
-            /*vector<int>
-             Mat descriptors;
-             descriptors=descriptors1;
-             cout<< descriptor;
-             */
-            
-            output.write((char*)&x, sizeof(x));
-            output.write((char*)&y, sizeof(y));
-            output.write((char*)&scale, sizeof(scale));
-            output.write((char*)&orientation, sizeof(orientation));
-            output.write((char*)descriptor, sizeof(float)*descriptors1.row(i).total());	
-        }
-    }
+    cout << keypoints1.size() << " total points + ";
+    cout << descriptors1.total() << " descriptors >" << endl;
     
-	output.close();
+    std::ofstream kofs;
+    kofs.open(filepathKeypoints.str().c_str(), std::ios::out | ios::binary);
+    if (kofs.is_open())
+        kofs.write((char *)&keypoints1, sizeof(KeyPoint)*keypoints1.size());
+    kofs.close();
+    
+    std::ofstream dofs(filepathDescriptors.str().c_str(), std::ios::out | ios::binary);
+    if (dofs.is_open())
+        dofs.write((char *)&descriptors1, descriptors1.total() *descriptors1.elemSize());
+    dofs.close();
+    
+    /*
+     std::ofstream output;
+     output.open(filepath.str().c_str(), std::ios::out | std::ios::binary);
+     
+     
+     
+     if (output.is_open())
+     {
+     
+     int nbFeature = (int)keypoints1.size();//(int)mFeatureInfos[fileIndex].points.size();
+     output.write((char*)&nbFeature, sizeof(nbFeature));
+     
+     // FeatureInfo featureInfo = mFeatureInfos[fileIndex];
+     for (int i=0; i<nbFeature; ++i)
+     {			
+     float x           = keypoints1[i].pt.x;
+     float y           = keypoints1[i].pt.y;
+     float scale       = keypoints1[i].size;
+     float orientation = keypoints1[i].angle;
+     
+     uchar* descriptor = descriptors1.row(i).data;
+     
+     
+     
+     output.write((char*)&x, sizeof(x));
+     output.write((char*)&y, sizeof(y));
+     output.write((char*)&scale, sizeof(scale));
+     output.write((char*)&orientation, sizeof(orientation));
+     // output.write((char*)descriptor, sizeof(float)*descriptors1.row(i).total());	
+     output.write((char*)descriptor, sizeof(descriptor));	
+     }
+     }
+     
+     output.close();
+     */
     
 };
 

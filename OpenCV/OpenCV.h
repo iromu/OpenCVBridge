@@ -11,14 +11,17 @@
 #ifndef OpenCV_
 #define OpenCV_
 
+
+
 /* The classes below are exported */
 #pragma GCC visibility push(default)
+
 //typedef Scalar_<double> Scalar;
 class OpenCV
 {
 public:
-    //std:vector<KeyPoint> keypoints1;
-    //Mat descriptors1;
+    //std::vector<cv::KeyPoint> keypoints1;
+    //cv::Mat descriptors1;
     
     void init();
     void init(const char *,const char *);
@@ -27,6 +30,7 @@ public:
     void saveAsciiKeyFile(const char *);
     
     void feature_detect(int , int , int  ,  unsigned char * ,const char *);
+    void feature_detect(const char *);
     void matcher(int , int , int  ,  unsigned char * );
 };
 
