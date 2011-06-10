@@ -213,6 +213,7 @@
 				PRIVATE_HEADERS_FOLDER_PATH = /opt/local/include;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PUBLIC_HEADERS_FOLDER_PATH = /opt/local/include;
+				VALID_ARCHS = x86_64;
 			};
 			name = Debug;
 		};
@@ -224,15 +225,18 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				FRAMEWORK_SEARCH_PATHS = /opt/local/include;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = RELEASE;
 				HEADER_SEARCH_PATHS = /opt/local/include;
 				INSTALL_PATH = "@executable_path/../Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					/opt/local/lib,
 				);
+				ONLY_ACTIVE_ARCH = YES;
 				PRIVATE_HEADERS_FOLDER_PATH = /opt/local/include;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PUBLIC_HEADERS_FOLDER_PATH = /opt/local/include;
+				VALID_ARCHS = x86_64;
 			};
 			name = Release;
 		};

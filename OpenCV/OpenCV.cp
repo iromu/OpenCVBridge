@@ -60,7 +60,9 @@ void OpenCV::init()
 
 void OpenCV::init(const char *  d,const char *  e)
 {
-    
+    int max_threads = cvGetNumThreads();
+    max_threads = cv::getNumThreads();
+    int threadnum = cv::getThreadNum();
     detectorString = d;
     extractorString = e;
     
@@ -254,7 +256,7 @@ void OpenCV::feature_detect(int h, int w, int  samplesPerPixel,  unsigned char *
     Mat img;
     //filename=0;
     if (filename) {
-        img=imread(filename);
+        img=imread(filename,CV_LOAD_IMAGE_GRAYSCALE);
         // Mat color_dst;
         //cvtColor( img, color_dst, CV_GRAY2BGR );
         namedWindow(winName, CV_WINDOW_NORMAL);
@@ -322,22 +324,26 @@ void OpenCV::feature_detect( const char *  filename)
     cout << endl << "< Extracting keypoints from image " << filename ;
     
     Mat img;
-    img=imread(filename);
+    img=imread(filename, CV_LOAD_IMAGE_GRAYSCALE);
     img1=img;
+    //namedWindow(winName);
+    //setWindowProperty(winName,CV_WND_PROP_ASPECTRATIO,CV_WINDOW_KEEPRATIO);
+    //imshow( winName, img );
     
-    vector<KeyPoint> keypoints;
-    keypoints1 = keypoints;
     
-    detector->detect( img, keypoints1 );
+    vector<KeyPoint> keypointsd;
+    keypoints1 = keypointsd;
+    
+    detector->detect( img1, keypoints1 );
     
     cout << keypoints1.size() << " points >" << endl;
     
     cout << "< Computing descriptors for keypoints from image... ";
     
-    Mat descriptors;
-    descriptors1=descriptors;
+    Mat descriptorsd;
+    descriptors1=descriptorsd;
     
-    descriptorExtractor->compute( img, keypoints1, descriptors1 );
+    descriptorExtractor->compute( img1, keypoints1, descriptors1 );
     cout << keypoints1.size() << " total points + ";
     cout << descriptors1.total() << " descriptors >" << endl;
     
