@@ -24,13 +24,16 @@
 #include "OpenCV.h"
 #include "OpenCVPriv.h"
 
+#include "BuildModel.cpp"
+
 using namespace cv;
 using namespace std;
 
 #define DRAW_RICH_KEYPOINTS_MODE    0
 #define DRAW_OUTLIERS_MODE           0
 
-const string winName = "correspondences";
+
+const string winName = "verbose";
 
 enum { NONE_FILTER = 0, CROSS_CHECK_FILTER = 1 };
 
@@ -52,17 +55,104 @@ string algStringCode;
 std::vector<KeyPoint> keypoints1;
 Mat descriptors1;
 
-
 void OpenCV::init()
 {    
-    init("SIFT","SIFT");
+    //init("SIFT","SIFT");
+};
+
+void OpenCV::initDescriptorExtractor(const char *  d)
+{    
+    extractorString = d;
+    descriptorExtractor = DescriptorExtractor::create( extractorString );
+};
+
+void OpenCV::initFeatureDetector(const char *  d)
+{    
+    detectorString = d;
+    detector = FeatureDetector::create( detectorString );
+};
+
+void OpenCV::initDescriptorMatcher(const char *  dd,const char *  ff)
+{    
+    descriptorMatcher = DescriptorMatcher::create( dd );
+    OpenCVPriv *theObj = new OpenCVPriv;
+    mactherFilterType = theObj->getMatcherFilterType( ff );
+    delete theObj;
+};
+
+void OpenCV::matchFeatures(const char *  ii,const char *  jj)
+{
+    try{
+        Mat iDescriptors, jDescriptors;
+        std::vector<KeyPoint> iKeypoints,jKeypoints;
+        cv::FileStorage fs(ii, FileStorage::READ);
+        if( fs.isOpened())
+        {
+            //fs["keypoints"] >> iKeypoints;
+            fs["descriptors"] >> iDescriptors;
+            
+            cout << iDescriptors.total() << " iDescriptors >" ;
+            
+        }
+        //fs.release();
+        fs.open(jj, FileStorage::READ);
+        if( fs.isOpened())
+        {
+            //fs["keypoints"] >> jKeypoints;
+            fs["descriptors"] >> jDescriptors;
+            
+            cout << jDescriptors.total() << " jDescriptors >" ;
+            
+        }
+        //fs.release();
+        
+        OpenCVPriv *theObj = new OpenCVPriv;
+        
+        
+        vector<DMatch> filteredMatches;
+        switch( mactherFilterType )
+        {
+            case CROSS_CHECK_FILTER :
+                theObj->crossCheckMatching( descriptorMatcher, iDescriptors, jDescriptors, filteredMatches, 1 );
+                break;
+            default :
+                theObj->simpleMatching( descriptorMatcher, iDescriptors, jDescriptors, filteredMatches );
+        }
+        
+        cout << filteredMatches.size() << " filteredMatches >" << endl;
+        
+        std::stringstream output;
+        output << ii<<".matches.xml";
+        fs.open(output.str().c_str(), FileStorage::APPEND);
+        if( fs.isOpened())
+        {
+            
+            // fs<<"filteredMatches"<<filteredMatches;
+            //fs<<"filteredMatches"<<(DMatch)filteredMatches[0];
+            // cv::write(fs, "filteredMatches", (DMatch)filteredMatches[0]);
+            fs << "matches" << "[";
+            for (int i=0; i<filteredMatches.size(); ++i) {
+                
+                DMatch o = filteredMatches[i];
+                fs<<o.queryIdx<<o.trainIdx<<o.imgIdx<<o.distance;
+            }
+            fs << "]";
+           
+            
+        }
+        
+        fs.release();
+        
+        delete theObj;
+    }
+    catch(...) {
+        cout << "OPENCV_UNKNOWN_EXCEPTION" << endl;
+    }
+    
 };
 
 void OpenCV::init(const char *  d,const char *  e)
 {
-    int max_threads = cvGetNumThreads();
-    max_threads = cv::getNumThreads();
-    int threadnum = cv::getThreadNum();
     detectorString = d;
     extractorString = e;
     
@@ -70,293 +160,97 @@ void OpenCV::init(const char *  d,const char *  e)
     algCode<<d<<"-"<<e;
     algStringCode = (d == e)?d:algCode.str().c_str();
     
-    isWarpPerspective=false;
-    //    ransacReprojThreshold=3;
-    
     cout << "< Creating detector";
     detector = FeatureDetector::create( detectorString );
     
     cout << "< Creating detector, descriptor extractor";
     descriptorExtractor = DescriptorExtractor::create( extractorString );
     
-    cout << "< Creating detector, descriptor extractor and descriptor matcher ... ";
-    descriptorMatcher = DescriptorMatcher::create( "FlannBased" );
-    
-    OpenCVPriv *theObj = new OpenCVPriv;
-    mactherFilterType = theObj->getMatcherFilterType( "CrossCheckFilter" );
     cout << ">" << endl;
-    if( detector.empty() || descriptorExtractor.empty() || descriptorMatcher.empty()  )
+    if( detector.empty() || descriptorExtractor.empty() )
     {
-        cout << "Can not create detector or descriptor extractor or descriptor matcher of given types" << endl;
-        //return -1;
+        cout << "Can not create detector or descriptor extractor of given types" << endl;
     }
     
 };
-
-void OpenCV::matcher(int h, int w, int  samplesPerPixel,  unsigned char * bitmapData)
-{
-    if(!img1.empty())   {
-        Mat img2 =  Mat(h,w,CV_MAKETYPE(CV_8U,  samplesPerPixel),  bitmapData);
-        RNG rng = theRNG();
-        Mat H12;
-        if( isWarpPerspective ){
-            //warpPerspectiveRand(img1, img2, H12, rng );
-            
-            H12.create(3, 3, CV_32FC1);
-            H12.at<float>(0,0) = rng.uniform( 0.8f, 1.2f);
-            H12.at<float>(0,1) = rng.uniform(-0.1f, 0.1f);
-            H12.at<float>(0,2) = rng.uniform(-0.1f, 0.1f)*img1.cols;
-            H12.at<float>(1,0) = rng.uniform(-0.1f, 0.1f);
-            H12.at<float>(1,1) = rng.uniform( 0.8f, 1.2f);
-            H12.at<float>(1,2) = rng.uniform(-0.1f, 0.1f)*img1.rows;
-            H12.at<float>(2,0) = rng.uniform( -1e-4f, 1e-4f);
-            H12.at<float>(2,1) = rng.uniform( -1e-4f, 1e-4f);
-            H12.at<float>(2,2) = rng.uniform( 0.8f, 1.2f);
-            
-            warpPerspective( img1, img2, H12, img1.size() );
-            
-        }
-        bool eval = !isWarpPerspective ? false : (ransacReprojThreshold == 0 ? false : true);
-        
-        cout << endl << "< Extracting keypoints from second image... ";
-        vector<KeyPoint> keypoints2;
-        detector->detect( img2, keypoints2 );
-        cout << keypoints2.size() << " points >" << endl;
-        
-        if( !H12.empty() && eval )  {
-            cout << "< Evaluate feature detector..." << endl;
-            float repeatability;
-            int correspCount;
-            evaluateFeatureDetector( img1, img2, H12, &keypoints1, &keypoints2, repeatability, correspCount );
-            cout << "repeatability = " << repeatability << endl;
-            cout << "correspCount = " << correspCount << endl;
-            cout << ">" << endl;
-        }
-        
-        cout << "< Computing descriptors for keypoints from second image... ";
-        Mat descriptors2;
-        descriptorExtractor->compute( img2, keypoints2, descriptors2 );
-        cout << ">" << endl;
-        
-        cout << "< Matching descriptors... ";
-        vector<DMatch> filteredMatches;
-        
-        OpenCVPriv *theObj = new OpenCVPriv;
-        delete theObj;
-        
-        switch( mactherFilterType )
-        {
-            case CROSS_CHECK_FILTER :
-            {
-                int knn = 1;
-                filteredMatches.clear();
-                vector<vector<DMatch> > matches12, matches21;
-                descriptorMatcher->knnMatch( descriptors1, descriptors2, matches12, knn );
-                descriptorMatcher->knnMatch( descriptors2, descriptors1, matches21, knn );
-                for( size_t m = 0; m < matches12.size(); m++ )
-                {
-                    bool findCrossCheck = false;
-                    for( size_t fk = 0; fk < matches12[m].size(); fk++ )
-                    {
-                        DMatch forward = matches12[m][fk];
-                        
-                        for( size_t bk = 0; bk < matches21[forward.trainIdx].size(); bk++ )
-                        {
-                            DMatch backward = matches21[forward.trainIdx][bk];
-                            if( backward.trainIdx == forward.queryIdx )
-                            {
-                                filteredMatches.push_back(forward);
-                                findCrossCheck = true;
-                                break;
-                            }
-                        }
-                        if( findCrossCheck ) break;
-                    }
-                }
-            }
-                break;
-            default :{
-                vector<DMatch> matches;
-                descriptorMatcher->match( descriptors1, descriptors2, filteredMatches );
-            }
-        }
-        cout << ">" << endl;
-        
-        if( !H12.empty()  &&eval)
-        {
-            cout << "< Evaluate descriptor match..." << endl;
-            vector<Point2f> curve;
-            Ptr<GenericDescriptorMatcher> gdm = new VectorDescriptorMatcher( descriptorExtractor, descriptorMatcher );
-            evaluateGenericDescriptorMatcher( img1, img2, H12, keypoints1, keypoints2, 0, 0, curve, gdm );
-            for( float l_p = 0; l_p < 1 - FLT_EPSILON; l_p+=0.1f )
-                cout << "1-precision = " << l_p << "; recall = " << getRecall( curve, l_p ) << endl;
-            cout << ">" << endl;
-        }
-        
-        vector<int> queryIdxs( filteredMatches.size() ), trainIdxs( filteredMatches.size() );
-        for( size_t i = 0; i < filteredMatches.size(); i++ )
-        {
-            queryIdxs[i] = filteredMatches[i].queryIdx;
-            trainIdxs[i] = filteredMatches[i].trainIdx;
-        }
-        
-        if( !isWarpPerspective && ransacReprojThreshold >= 0 )
-        {
-            cout << "< Computing homography (RANSAC)..." << endl;
-            vector<Point2f> points1; KeyPoint::convert(keypoints1, points1, queryIdxs);
-            vector<Point2f> points2; KeyPoint::convert(keypoints2, points2, trainIdxs);
-            H12 = findHomography( Mat(points1), Mat(points2), CV_RANSAC, ransacReprojThreshold );
-            cout << ">" << endl;
-        }
-        
-        Mat drawImg;
-        if( !H12.empty() ) // filter outliers
-        {
-            vector<char> matchesMask( filteredMatches.size(), 0 );
-            vector<Point2f> points1; KeyPoint::convert(keypoints1, points1, queryIdxs);
-            vector<Point2f> points2; KeyPoint::convert(keypoints2, points2, trainIdxs);
-            Mat points1t; perspectiveTransform(Mat(points1), points1t, H12);
-            for( size_t i1 = 0; i1 < points1.size(); i1++ )
-            {
-                if( norm(points2[i1] - points1t.at<Point2f>((int)i1,0)) < 4 ) // inlier
-                    matchesMask[i1] = 1;
-            }
-            
-            // draw inliers
-            drawMatches( img1, keypoints1, img2, keypoints2, filteredMatches, drawImg, CV_RGB(0, 255, 0), CV_RGB(0, 0, 255), matchesMask
-#if DRAW_RICH_KEYPOINTS_MODE
-                        , DrawMatchesFlags::DRAW_RICH_KEYPOINTS
-#endif
-                        );
-            
-#if DRAW_OUTLIERS_MODE
-            // draw outliers
-            for( size_t i1 = 0; i1 < matchesMask.size(); i1++ )
-                matchesMask[i1] = !matchesMask[i1];
-            drawMatches( img1, keypoints1, img2, keypoints2, filteredMatches, drawImg, CV_RGB(0, 0, 255), CV_RGB(255, 0, 0), matchesMask,
-                        DrawMatchesFlags::DRAW_OVER_OUTIMG | DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS );
-#endif
-        }
-        else
-            drawMatches( img1, keypoints1, img2, keypoints2, filteredMatches, drawImg );
-        
-        //drawMatches( img1, keypoints1, img2, keypoints2, filteredMatches, drawImg );
-        
-        
-        //namedWindow(winName, 1);
-        imshow( winName, drawImg );
-        
-    }
-}
-
-void OpenCV::feature_detect(int h, int w, int  samplesPerPixel,  unsigned char * bitmapData, const char *  filename)
-{
-    
-    cout << endl << "< Extracting keypoints from image... " ;
-    Mat img;
-    //filename=0;
-    if (filename) {
-        img=imread(filename,CV_LOAD_IMAGE_GRAYSCALE);
-        // Mat color_dst;
-        //cvtColor( img, color_dst, CV_GRAY2BGR );
-        namedWindow(winName, CV_WINDOW_NORMAL);
-        setWindowProperty(winName,CV_WND_PROP_ASPECTRATIO,CV_WINDOW_KEEPRATIO);
-        imshow( winName, img );
-    }
-    else{
-        //BUG
-        img =  Mat(h,w,CV_MAKETYPE(CV_8U,  samplesPerPixel),  bitmapData);
-        
-        namedWindow(winName, CV_WINDOW_NORMAL);
-        setWindowProperty(winName,CV_WND_PROP_ASPECTRATIO,CV_WINDOW_KEEPRATIO);
-        imshow( winName, img );
-    }
-    
-    img1=img;
-    vector<KeyPoint> keypoints;
-    keypoints1 = keypoints;
-    
-    detector->detect( img, keypoints1 );
-    cout << keypoints1.size() << " points >" << endl;
-    
-    cout << "< Computing descriptors for keypoints from image... ";
-    
-    Mat descriptors;
-    descriptors1=descriptors;
-    
-    descriptorExtractor->compute( img, keypoints1, descriptors1 );
-    cout << keypoints1.size() << " total points + ";
-    cout << descriptors1.total() << " descriptors >" << endl;
-    if (filename)
-    {
-        std::stringstream filepath,filepathKeypoints,filepathDescriptors;
-        filepath << filename << "." << algStringCode << ".xml.gz";
-        //filepathKeypoints << filename << "." << algStringCode << ".keypoints.xml.gz";
-        //filepathDescriptors << filename << "." << algStringCode << ".descriptors.xml.gz";
-        
-        
-        //saveAsciiKeyFile(filename);
-        cv::FileStorage kfs(filepath.str().c_str(), cv::FileStorage::WRITE);
-        if( kfs.isOpened())
-        {
-            //descriptors1.write(dfs);
-            cv::write(kfs, "algorithm", algStringCode);
-            cv::write(kfs, "keypoints", keypoints1);
-            //kfs.release();
-            
-            //cv::FileStorage dfs(filepathDescriptors.str().c_str(), cv::FileStorage::WRITE);
-            //descriptors1.write(dfs);
-            //if( dfs.isOpened())
-            cv::write(kfs, "descriptors", descriptors1);
-        }
-        //dfs.release();
-        kfs.release();
-        //dfs.write(dfs, keypoints1);
-        // saveBinaryKeyFile(filename);
-    }
-    //namedWindow(winName, 1);
-    //imshow( winName, descriptors1 );
-};
-
 
 void OpenCV::feature_detect( const char *  filename)
 {
+    std::stringstream algCode;
+    algCode<<detectorString<<"-"<<extractorString;
+    algStringCode = (detectorString == extractorString)?detectorString:algCode.str().c_str();
+    
     cout << endl << "< Extracting keypoints from image " << filename ;
-    
-    Mat img;
-    img=imread(filename, CV_LOAD_IMAGE_GRAYSCALE);
-    img1=img;
-    //namedWindow(winName);
-    //setWindowProperty(winName,CV_WND_PROP_ASPECTRATIO,CV_WINDOW_KEEPRATIO);
-    //imshow( winName, img );
-    
-    
-    vector<KeyPoint> keypointsd;
-    keypoints1 = keypointsd;
-    
-    detector->detect( img1, keypoints1 );
-    
-    cout << keypoints1.size() << " points >" << endl;
-    
-    cout << "< Computing descriptors for keypoints from image... ";
-    
-    Mat descriptorsd;
-    descriptors1=descriptorsd;
-    
-    descriptorExtractor->compute( img1, keypoints1, descriptors1 );
-    cout << keypoints1.size() << " total points + ";
-    cout << descriptors1.total() << " descriptors >" << endl;
-    
-    std::stringstream output;
-    output << filename << "." << algStringCode << ".xml.gz";
-    cv::FileStorage fs(output.str().c_str(), FileStorage::WRITE);
-    if( fs.isOpened())
-    {
-        cv::write(fs, "algorithm", algStringCode);
-        cv::write(fs, "keypoints", keypoints1);
-        cv::write(fs, "descriptors", descriptors1);
+    try {
+        
+        
+        Mat img;
+        img=imread(filename, CV_LOAD_IMAGE_GRAYSCALE);
+        //img1=img;
+        //namedWindow(winName);
+        //setWindowProperty(winName,CV_WND_PROP_ASPECTRATIO,CV_WINDOW_KEEPRATIO);
+        //imshow( winName, img );
+        
+        
+        vector<KeyPoint> keypoints;
+        //keypoints1 = keypoints;
+        
+        detector->detect( img, keypoints );
+        
+        cout << keypoints.size() << " points >" << endl;
+        
+        cout << "< Computing descriptors for keypoints from image... ";
+        
+        //Mat descriptorsd;
+        Mat descriptors(1, 
+                        (int)(keypoints.size() * sizeof(KeyPoint)), CV_8U, 
+                        &keypoints[0]);
+        //descriptors1=descriptorsd;
+        
+        descriptorExtractor->compute( img, keypoints, descriptors );
+        cout << keypoints.size() << " total points + ";
+        cout << descriptors.total() << " descriptors >" << endl;
+        
+        std::stringstream output;
+        output << filename << "." << algStringCode << ".xml";
+        cv::FileStorage fs(output.str().c_str(), FileStorage::WRITE);
+        if( fs.isOpened())
+        {
+            
+            fs<<"algorithm"<<algStringCode;
+            fs<<"descriptors"<<descriptors;
+            //fs<<"keypoints"<<keypoints;
+            
+            fs << "keypoints" << "[";
+            for(int i=0;i<keypoints.size();++i)
+            {
+                // fs << (KeyPoint)keypoints[i];
+            }
+            
+            cv::write(fs, "keypoints", keypoints);
+            
+            fs << "]";
+            /* 
+             cv::write(fs, "algorithm", algStringCode);
+             cv::write(fs, "keypoints", keypoints);
+             cv::write(fs, "descriptors", descriptors);
+             */ 
+        }
+        
+        fs.release();
+        
+        //cv::FileStorage->flush(output);
+        //cvFlushSeqWriter(<#CvSeqWriter *writer#>)
+#ifdef DEBUG
+        Mat outImg;
+        drawKeypoints( img, keypoints, outImg);
+        namedWindow(winName);
+        imshow( winName, outImg );
+#endif
     }
-    fs.release();
+    catch(...) {
+        cout << "OPENCV_UNKNOWN_EXCEPTION" << endl;
+    }
 };
 
 
@@ -461,15 +355,79 @@ void OpenCV::saveBinaryKeyFile(const char *  filename)
      */
     
 };
-
-
-int OpenCVPriv::getMatcherFilterType( const char * str)
+void OpenCV::buildPointModel()
 {
+    vector<string> imageList;
+    vector<Rect> roiList;
+    vector<Vec6f> poseList;
+    
+    vector<Point3f> modelBox;
+    PointModel model;
+    const char* modelName = "test";
+    model.name = modelName;
+    Mat cameraMatrix, distCoeffs;
+    
+    //Size calibratedImageSize;
+    //readCameraMatrix(intrinsicsFilename, cameraMatrix, distCoeffs, calibratedImageSize);
+    
+    
+    OpenCVPriv *theObj = new OpenCVPriv;
+    build3dmodel( detector, descriptorExtractor, modelBox,
+                 imageList, roiList, poseList, cameraMatrix, model );
+    string outputModelName = format("%s_model.yml.gz", modelName);
+    
+    delete theObj;
+};
+
+
+void OpenCVPriv::simpleMatching( Ptr<DescriptorMatcher>& descriptorMatcher,
+                                const Mat& descriptors1, const Mat& descriptors2,
+                                vector<DMatch>& matches12 )
+{
+    vector<DMatch> matches;
+    descriptorMatcher->match( descriptors1, descriptors2, matches12 );
+};
+
+void OpenCVPriv::crossCheckMatching( Ptr<DescriptorMatcher>& descriptorMatcher,
+                                    const Mat& descriptors1, const Mat& descriptors2,
+                                    vector<DMatch>& filteredMatches12, int knn=1 )
+{
+    filteredMatches12.clear();
+    vector<vector<DMatch> > matches12, matches21;
+    descriptorMatcher->knnMatch( descriptors1, descriptors2, matches12, knn );
+    descriptorMatcher->knnMatch( descriptors2, descriptors1, matches21, knn );
+    for( size_t m = 0; m < matches12.size(); m++ )
+    {
+        bool findCrossCheck = false;
+        for( size_t fk = 0; fk < matches12[m].size(); fk++ )
+        {
+            DMatch forward = matches12[m][fk];
+            
+            for( size_t bk = 0; bk < matches21[forward.trainIdx].size(); bk++ )
+            {
+                DMatch backward = matches21[forward.trainIdx][bk];
+                if( backward.trainIdx == forward.queryIdx )
+                {
+                    filteredMatches12.push_back(forward);
+                    findCrossCheck = true;
+                    break;
+                }
+            }
+            if( findCrossCheck ) break;
+        }
+    }
+};
+
+int OpenCVPriv::getMatcherFilterType( const string& str)
+{
+    //std::string s = str;
     if( str == "NoneFilter" )
         return NONE_FILTER;
     if( str == "CrossCheckFilter" )
         return CROSS_CHECK_FILTER;
-    CV_Error(CV_StsBadArg, "Invalid filter name");
-    return -1;
+    
+    return NONE_FILTER;
+    //CV_Error(CV_StsBadArg, "Invalid filter name");
+    //return -1;
 };
 

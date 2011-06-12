@@ -15,7 +15,7 @@
 
 /* The classes below are exported */
 #pragma GCC visibility push(default)
-
+//#include <opencv2/core/core.hpp>
 //typedef Scalar_<double> Scalar;
 class OpenCV
 {
@@ -24,14 +24,22 @@ public:
     //cv::Mat descriptors1;
     
     void init();
+    
     void init(const char *,const char *);
+    
+    void initFeatureDetector(const char *);
+    void initDescriptorExtractor(const char *);
+    void initDescriptorMatcher(const char *,const char *);
+    
+    
+    void matchFeatures(const char *,const char *);
     
     void saveBinaryKeyFile(const char *);
     void saveAsciiKeyFile(const char *);
     
-    void feature_detect(int , int , int  ,  unsigned char * ,const char *);
     void feature_detect(const char *);
-    void matcher(int , int , int  ,  unsigned char * );
+    void buildPointModel();
+    
 };
 
 #pragma GCC visibility pop
