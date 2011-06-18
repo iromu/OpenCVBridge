@@ -16,6 +16,8 @@
 /* The classes below are exported */
 #pragma GCC visibility push(default)
 //#include <opencv2/core/core.hpp>
+#include <vector>
+#include <string>
 //typedef Scalar_<double> Scalar;
 class OpenCV
 {
@@ -37,8 +39,10 @@ public:
     void saveBinaryKeyFile(const char *);
     void saveAsciiKeyFile(const char *);
     
-    void feature_detect(const char *);
-    void buildPointModel();
+    unsigned long feature_detect(const char *);
+    
+    unsigned long feature_check(const char *);
+    void buildPointModel(std::vector<std::string>);
     
 };
 

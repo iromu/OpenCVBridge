@@ -20,6 +20,8 @@
 #include <map>
 #include <fstream>
 #include <iomanip>
+#include <execinfo.h>
+#include <stdio.h>
 
 #include "OpenCV.h"
 #include "OpenCVPriv.h"
@@ -29,9 +31,11 @@
 using namespace cv;
 using namespace std;
 
+#define DRAW 1
 #define DRAW_RICH_KEYPOINTS_MODE    0
 #define DRAW_OUTLIERS_MODE           0
 
+//#define DEBUG
 
 const string winName = "verbose";
 
@@ -82,72 +86,161 @@ void OpenCV::initDescriptorMatcher(const char *  dd,const char *  ff)
 
 void OpenCV::matchFeatures(const char *  ii,const char *  jj)
 {
-    try{
-        Mat iDescriptors, jDescriptors;
-        std::vector<KeyPoint> iKeypoints,jKeypoints;
-        cv::FileStorage fs(ii, FileStorage::READ);
-        if( fs.isOpened())
-        {
-            //fs["keypoints"] >> iKeypoints;
-            fs["descriptors"] >> iDescriptors;
-            
-            cout << iDescriptors.total() << " iDescriptors >" ;
-            
-        }
-        //fs.release();
-        fs.open(jj, FileStorage::READ);
-        if( fs.isOpened())
-        {
-            //fs["keypoints"] >> jKeypoints;
-            fs["descriptors"] >> jDescriptors;
-            
-            cout << jDescriptors.total() << " jDescriptors >" ;
-            
-        }
-        //fs.release();
+    //  try{
+    
+    int ransacReprojThreshold=8;//3 8, 1-10
+    
+    Mat iDescriptors, jDescriptors;
+    string filename1,filename2;
+    std::vector<KeyPoint> iKeypoints,jKeypoints;
+    cv::FileStorage fs(ii, FileStorage::READ);
+    if( fs.isOpened())
+    {
+        //fs["keypoints"] >> iKeypoints;
         
-        OpenCVPriv *theObj = new OpenCVPriv;
+        fs["filename"] >> filename1;
+        cv::read( fs["keypoints"], iKeypoints);
+        fs["descriptors"] >> iDescriptors;
         
+        cout << iDescriptors.total() << " iDescriptors >" ;
         
-        vector<DMatch> filteredMatches;
-        switch( mactherFilterType )
-        {
-            case CROSS_CHECK_FILTER :
-                theObj->crossCheckMatching( descriptorMatcher, iDescriptors, jDescriptors, filteredMatches, 1 );
-                break;
-            default :
-                theObj->simpleMatching( descriptorMatcher, iDescriptors, jDescriptors, filteredMatches );
-        }
-        
-        cout << filteredMatches.size() << " filteredMatches >" << endl;
-        
-        std::stringstream output;
-        output << ii<<".matches.xml";
-        fs.open(output.str().c_str(), FileStorage::APPEND);
-        if( fs.isOpened())
-        {
-            
-            // fs<<"filteredMatches"<<filteredMatches;
-            //fs<<"filteredMatches"<<(DMatch)filteredMatches[0];
-            // cv::write(fs, "filteredMatches", (DMatch)filteredMatches[0]);
-            fs << "matches" << "[";
-            for (int i=0; i<filteredMatches.size(); ++i) {
-                
-                DMatch o = filteredMatches[i];
-                fs<<o.queryIdx<<o.trainIdx<<o.imgIdx<<o.distance;
-            }
-            fs << "]";
-           
-            
-        }
-        
-        fs.release();
-        
-        delete theObj;
     }
-    catch(...) {
-        cout << "OPENCV_UNKNOWN_EXCEPTION" << endl;
+    //fs.release();
+    fs.open(jj, FileStorage::READ);
+    if( fs.isOpened())
+    {
+        //fs["keypoints"] >> jKeypoints;
+        fs["filename"] >> filename2;
+        fs["descriptors"] >> jDescriptors;
+        //cv::read("keypoints",  jKeypoints);
+        cv::read( fs["keypoints"], jKeypoints);
+        cout << jDescriptors.total() << " jDescriptors >" ;
+        
     }
+    //fs.release();
+    
+    OpenCVPriv *theObj = new OpenCVPriv;
+    
+    
+    vector<DMatch> filteredMatches;
+    switch( mactherFilterType )
+    {
+        case CROSS_CHECK_FILTER :
+            theObj->crossCheckMatching( descriptorMatcher, iDescriptors, jDescriptors, filteredMatches, 1 );
+            break;
+        default :
+            theObj->simpleMatching( descriptorMatcher, iDescriptors, jDescriptors, filteredMatches );
+    }
+    
+    cout << filteredMatches.size() << " filteredMatches >" << endl;
+    
+    Mat H12;
+    vector<int> queryIdxs( filteredMatches.size() ), trainIdxs( filteredMatches.size() );
+    for( size_t i = 0; i < filteredMatches.size(); i++ )
+    {
+        queryIdxs[i] = filteredMatches[i].queryIdx;
+        trainIdxs[i] = filteredMatches[i].trainIdx;
+    }
+    
+    if(  ransacReprojThreshold >= 0 )
+    {
+        
+        cout << "< Computing homography (RANSAC)..." << endl;
+        vector<Point2f> points1; KeyPoint::convert(iKeypoints, points1, queryIdxs);
+        vector<Point2f> points2; KeyPoint::convert(jKeypoints, points2, trainIdxs);
+        H12 = findHomography( Mat(points1), Mat(points2), CV_RANSAC, ransacReprojThreshold );
+        cout << ">" << endl;
+    }
+    
+    std::stringstream output;
+    output << ii<<".matches.xml";
+    fs.open(output.str().c_str(), FileStorage::APPEND);
+    if( fs.isOpened())
+    {
+        
+        // fs<<"filteredMatches"<<filteredMatches;
+        //fs<<"filteredMatches"<<(DMatch)filteredMatches[0];
+        // cv::write(fs, "filteredMatches", (DMatch)filteredMatches[0]);
+        fs << "FEATURES1" << ii << "FEATURES2" << jj;
+        fs << "matches" << "[";
+        for (int i=0; i<filteredMatches.size(); ++i) {
+            
+            DMatch o = filteredMatches[i];
+            fs<<o.queryIdx<<o.trainIdx<<o.imgIdx<<o.distance;
+        }
+        fs << "]";
+        
+        
+    }
+    
+    fs.release();
+    
+    delete theObj;
+    
+#if DRAW
+    Mat drawImg;
+    Mat img1=imread(filename1, CV_LOAD_IMAGE_GRAYSCALE);
+    Mat img2=imread(filename2, CV_LOAD_IMAGE_GRAYSCALE);
+    
+    
+    
+    if( !H12.empty() ) // filter outliers
+    {
+        vector<char> matchesMask( filteredMatches.size(), 0 );
+        vector<Point2f> points1; KeyPoint::convert(iKeypoints, points1, queryIdxs);
+        vector<Point2f> points2; KeyPoint::convert(jKeypoints, points2, trainIdxs);
+        Mat points1t; perspectiveTransform(Mat(points1), points1t, H12);
+        for( size_t i1 = 0; i1 < points1.size(); i1++ )
+        {
+            if( norm(points2[i1] - points1t.at<Point2f>((int)i1,0)) < 4 ) // inlier
+                matchesMask[i1] = 1;
+        }
+        // draw inliers
+        drawMatches( img1, iKeypoints, img2, jKeypoints, filteredMatches, drawImg, CV_RGB(0, 255, 0), CV_RGB(0, 0, 255), matchesMask
+#if DRAW_RICH_KEYPOINTS_MODE
+                    , DrawMatchesFlags::DRAW_RICH_KEYPOINTS
+#endif
+                    );
+        
+#if DRAW_OUTLIERS_MODE
+        // draw outliers
+        for( size_t i1 = 0; i1 < matchesMask.size(); i1++ )
+            matchesMask[i1] = !matchesMask[i1];
+        drawMatches( img1, iKeypoints, img2, jKeypoints, filteredMatches, drawImg, CV_RGB(0, 0, 255), CV_RGB(255, 0, 0), matchesMask,
+                    DrawMatchesFlags::DRAW_OVER_OUTIMG | DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS );
+#endif
+    }
+    else
+        drawMatches( img1, iKeypoints, img2, jKeypoints, filteredMatches, drawImg );
+    
+    
+    //    const int scale = 2;
+    //cv::resize(const cv::Mat &src, <#cv::Mat &dst#>, <#Size dsize#>)
+    //CvMat* cvmat = drawImg;
+    //IplImage *  gray_image = cvmat; 
+    //IplImage *  small_image   = cvCreateImage(cvSize (gray_image->width / scale, gray_image->height / scale), IPL_DEPTH_8U, 1);
+    Mat small_image; 
+    
+    cv::resize(drawImg, small_image, img1.size());
+    
+    imshow( winName, small_image );
+#endif       
+    // }
+    /*
+     catch (Exception theException) 
+     {
+     cout << "OPENCV_MATCH_UNKNOWN_EXCEPTION: " << theException;
+     }*/
+    /*  catch(...) {
+     cout << "OPENCV_MATCH_UNKNOWN_EXCEPTION" << endl;
+     void* callstack[128];
+     int i, frames = backtrace(callstack, 128);
+     char** strs = backtrace_symbols(callstack, frames);
+     for (i = 0; i < frames; ++i) {
+     printf("%s\n", strs[i]);
+     }
+     free(strs);
+     }*/
     
 };
 
@@ -174,7 +267,19 @@ void OpenCV::init(const char *  d,const char *  e)
     
 };
 
-void OpenCV::feature_detect( const char *  filename)
+unsigned long OpenCV::feature_check(const char * filename)
+{
+    std::vector<KeyPoint> keypoints;
+    cv::FileStorage fs(filename, FileStorage::READ);
+    if( fs.isOpened())
+    {
+        cv::read( fs["keypoints"], keypoints);
+        return keypoints.size();
+    }
+    return 0;
+    fs.release();
+};
+unsigned long OpenCV::feature_detect( const char *  filename)
 {
     std::stringstream algCode;
     algCode<<detectorString<<"-"<<extractorString;
@@ -216,20 +321,23 @@ void OpenCV::feature_detect( const char *  filename)
         cv::FileStorage fs(output.str().c_str(), FileStorage::WRITE);
         if( fs.isOpened())
         {
-            
+            fs<<"filename"<<filename;
             fs<<"algorithm"<<algStringCode;
             fs<<"descriptors"<<descriptors;
             //fs<<"keypoints"<<keypoints;
-            
-            fs << "keypoints" << "[";
-            for(int i=0;i<keypoints.size();++i)
-            {
-                // fs << (KeyPoint)keypoints[i];
-            }
-            
             cv::write(fs, "keypoints", keypoints);
-            
-            fs << "]";
+            /*
+             fs << "keypoints" << "[";
+             for(int i=0;i<keypoints.size();++i)
+             {
+             // fs << (KeyPoint)keypoints[i];
+             //cv::write(fs, "keypoint", (KeyPoint)keypoints[i]);
+             }
+             
+             //cv::write(fs, "keypoints", keypoints);
+             
+             fs << "]";
+             */
             /* 
              cv::write(fs, "algorithm", algStringCode);
              cv::write(fs, "keypoints", keypoints);
@@ -241,15 +349,18 @@ void OpenCV::feature_detect( const char *  filename)
         
         //cv::FileStorage->flush(output);
         //cvFlushSeqWriter(<#CvSeqWriter *writer#>)
-#ifdef DEBUG
+        //#ifdef DEBUG
         Mat outImg;
         drawKeypoints( img, keypoints, outImg);
         namedWindow(winName);
         imshow( winName, outImg );
-#endif
+        //#endif
+        
+        
+        return keypoints.size();
     }
     catch(...) {
-        cout << "OPENCV_UNKNOWN_EXCEPTION" << endl;
+        cout << "OPENCV_FEATURE_UNKNOWN_EXCEPTION" << endl;
     }
 };
 
@@ -355,9 +466,9 @@ void OpenCV::saveBinaryKeyFile(const char *  filename)
      */
     
 };
-void OpenCV::buildPointModel()
+void OpenCV::buildPointModel(vector<string> imageList)
 {
-    vector<string> imageList;
+    // vector<string> imageList;
     vector<Rect> roiList;
     vector<Vec6f> poseList;
     
@@ -371,12 +482,12 @@ void OpenCV::buildPointModel()
     //readCameraMatrix(intrinsicsFilename, cameraMatrix, distCoeffs, calibratedImageSize);
     
     
-    OpenCVPriv *theObj = new OpenCVPriv;
+    // OpenCVPriv *theObj = new OpenCVPriv;
     build3dmodel( detector, descriptorExtractor, modelBox,
                  imageList, roiList, poseList, cameraMatrix, model );
     string outputModelName = format("%s_model.yml.gz", modelName);
     
-    delete theObj;
+    //delete theObj;
 };
 
 

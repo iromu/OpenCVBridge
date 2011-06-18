@@ -51,8 +51,8 @@ struct EqKeypoints
 
 
 static Mat getFundamentalMat( const Mat& R1, const Mat& t1,
-                                  const Mat& R2, const Mat& t2,
-                                  const Mat& cameraMatrix )
+                             const Mat& R2, const Mat& t2,
+                             const Mat& cameraMatrix )
 {
     Mat_<double> R = R2*R1.t(), t = t2 - R*t1;
     double tx = t.at<double>(0,0), ty = t.at<double>(1,0), tz = t.at<double>(2,0);
@@ -304,17 +304,38 @@ static void build3dmodel( const Ptr<FeatureDetector>& detector,
     // 1. find all the keypoints and all the descriptors
     for( size_t i = 0; i < nimages; i++ )
     {
-        Mat img = imread(imageList[i], 1), gray;
-        cvtColor(img, gray, CV_BGR2GRAY);
-        
         vector<KeyPoint> keypoints;
-        detector->detect(gray, keypoints);
-        descriptorExtractor->compute(gray, keypoints, descriptorbuf);
-        Point2f roiofs = roiList[i].tl(); 
-        for( size_t k = 0; k < keypoints.size(); k++ )
-            keypoints[k].pt += roiofs;
+        
+        std::stringstream descriptorsPath;
+        string algStringCode = "SURF";
+        descriptorsPath << imageList[i] << "." << algStringCode << ".xml";
+        cv::FileStorage fs(descriptorsPath.str().c_str(), FileStorage::READ);
+        
+        if( fs.isOpened())
+        {
+            fs["descriptors"] >> descriptorbuf;
+            cv::read( fs["keypoints"], keypoints);
+            
+        }
+        fs.release();
+        
+        //Point2f roiofs = roiList[i].tl(); 
+        //for( size_t k = 0; k < keypoints.size(); k++ )
+        //    keypoints[k].pt += roiofs;
         allkeypoints.push_back(keypoints);
         
+        
+        //        Mat img = imread(imageList[i], 1), gray;
+        //        cvtColor(img, gray, CV_BGR2GRAY);
+        //        
+        //        vector<KeyPoint> keypoints;
+        //        detector->detect(gray, keypoints);
+        //        descriptorExtractor->compute(gray, keypoints, descriptorbuf);
+        //        Point2f roiofs = roiList[i].tl(); 
+        //        for( size_t k = 0; k < keypoints.size(); k++ )
+        //            keypoints[k].pt += roiofs;
+        //        allkeypoints.push_back(keypoints);
+        //        
         Mat buf = descriptorbuf;
         if( !buf.isContinuous() || buf.type() != CV_32F )
         {
@@ -330,10 +351,10 @@ static void build3dmodel( const Ptr<FeatureDetector>& detector,
                   alldescriptorsVec.begin() + prev);
         dstart.push_back(dstart.back() + keypoints.size());
         
-        Mat R, t;
-        unpackPose(poseList[i], R, t);
-        Rs.push_back(R);
-        ts.push_back(t);
+        //Mat R, t;
+        //unpackPose(poseList[i], R, t);
+        //Rs.push_back(R);
+        //ts.push_back(t);
         
         if( (i+1)*progressBarSize/nimages > i*progressBarSize/nimages )
         {
