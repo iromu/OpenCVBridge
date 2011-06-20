@@ -33,7 +33,7 @@ using namespace std;
 
 #define DRAW 1
 #define DRAW_RICH_KEYPOINTS_MODE    0
-#define DRAW_OUTLIERS_MODE           0
+#define DRAW_OUTLIERS_MODE           1
 
 //#define DEBUG
 
@@ -84,8 +84,19 @@ void OpenCV::initDescriptorMatcher(const char *  dd,const char *  ff)
     delete theObj;
 };
 
+
+
+
 void OpenCV::matchFeatures(const char *  ii,const char *  jj)
+
 {
+    std::stringstream output;
+    output << ii<<".matches.xml";
+    matchFeatures(ii, jj,output.str().c_str());
+}
+void OpenCV::matchFeatures(const char *  ii,const char *  jj,const char *  dest)
+{
+    
     //  try{
     
     int ransacReprojThreshold=8;//3 8, 1-10
@@ -152,9 +163,9 @@ void OpenCV::matchFeatures(const char *  ii,const char *  jj)
         cout << ">" << endl;
     }
     
-    std::stringstream output;
-    output << ii<<".matches.xml";
-    fs.open(output.str().c_str(), FileStorage::APPEND);
+    //std::stringstream output;
+    //output << ii<<".matches.xml";
+    fs.open(dest, FileStorage::WRITE);
     if( fs.isOpened())
     {
         
@@ -166,7 +177,11 @@ void OpenCV::matchFeatures(const char *  ii,const char *  jj)
         for (int i=0; i<filteredMatches.size(); ++i) {
             
             DMatch o = filteredMatches[i];
-            fs<<o.queryIdx<<o.trainIdx<<o.imgIdx<<o.distance;
+            fs << "{" << "queryIdx" << o.queryIdx << "trainIdx" << o.trainIdx << "imgIdx"
+            << o.imgIdx << "distance"
+            << o.distance << "}";
+            
+            //fs<<o.queryIdx<<o.trainIdx<<o.imgIdx<<o.distance;
         }
         fs << "]";
         
@@ -275,6 +290,40 @@ unsigned long OpenCV::feature_check(const char * filename)
     {
         cv::read( fs["keypoints"], keypoints);
         return keypoints.size();
+    }
+    return 0;
+    fs.release();
+};
+
+unsigned long OpenCV::match_check(const char * filename)
+{
+    vector<DMatch> filteredMatches;
+    cv::FileStorage fs(filename, FileStorage::READ);
+    unsigned long size=0;
+    if( fs.isOpened())
+    {
+        FileNode n = fs["matches"];
+        if (n.type() != FileNode::SEQ)
+        {
+            cerr << "images is not a sequence! FAIL" << endl;
+            return 1;
+        }
+        
+        cout << "reading matches\n";
+        FileNodeIterator it = n.begin(), it_end = n.end();
+        for (; it != it_end; ++it)
+        {
+            //            cv::read(fs, <#double &value#>, <#double default_value#>)
+           
+            /*A = (int)*it ["A"];
+            X = (double)*it ["X"];
+            id = (string)*it ["id"];
+ */
+            size++;
+        }
+        
+        
+        return size;
     }
     return 0;
     fs.release();
@@ -477,9 +526,9 @@ void OpenCV::buildPointModel(vector<string> imageList)
     const char* modelName = "test";
     model.name = modelName;
     Mat cameraMatrix, distCoeffs;
-    
-    //Size calibratedImageSize;
-    //readCameraMatrix(intrinsicsFilename, cameraMatrix, distCoeffs, calibratedImageSize);
+    string intrinsicsFilename="/Users/Shared/VisualProcessing/data/camera.yml"  ;
+    Size calibratedImageSize;
+    readCameraMatrix(intrinsicsFilename, cameraMatrix, distCoeffs, calibratedImageSize);
     
     
     // OpenCVPriv *theObj = new OpenCVPriv;

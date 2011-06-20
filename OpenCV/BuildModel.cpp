@@ -520,3 +520,21 @@ static void build3dmodel( const Ptr<FeatureDetector>& detector,
     }
 };
 
+
+static bool readCameraMatrix(const string& filename,
+                             Mat& cameraMatrix, Mat& distCoeffs,
+                             Size& calibratedImageSize )
+{
+    FileStorage fs(filename, FileStorage::READ);
+    fs["image_width"] >> calibratedImageSize.width;
+    fs["image_height"] >> calibratedImageSize.height;
+    fs["distortion_coefficients"] >> distCoeffs;
+    fs["camera_matrix"] >> cameraMatrix;
+    
+    if( distCoeffs.type() != CV_64F )
+        distCoeffs = Mat_<double>(distCoeffs);
+    if( cameraMatrix.type() != CV_64F )
+        cameraMatrix = Mat_<double>(cameraMatrix);
+    
+    return true;
+};

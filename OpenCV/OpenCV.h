@@ -36,6 +36,10 @@ public:
     
     void matchFeatures(const char *,const char *);
     
+    void matchFeatures(const char *,const char *,const char *);
+    
+    unsigned long match_check(const char *);
+    
     void saveBinaryKeyFile(const char *);
     void saveAsciiKeyFile(const char *);
     
