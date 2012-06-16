@@ -8,19 +8,20 @@
 
 /* Begin PBXBuildFile section */
 		B5056EBC139ED29400137B5D /* OpenCV.cp in Sources */ = {isa = PBXBuildFile; fileRef = B5056EBB139ED29400137B5D /* OpenCV.cp */; };
-		B5056ECA139ED31E00137B5D /* libopencv_contrib.2.2.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B5056EC2139ED31E00137B5D /* libopencv_contrib.2.2.0.dylib */; };
-		B5056ECB139ED31E00137B5D /* libopencv_imgproc.2.2.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B5056EC3139ED31E00137B5D /* libopencv_imgproc.2.2.0.dylib */; };
-		B5056ECC139ED31E00137B5D /* libopencv_calib3d.2.2.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B5056EC4139ED31E00137B5D /* libopencv_calib3d.2.2.0.dylib */; };
-		B5056ECD139ED31E00137B5D /* libopencv_objdetect.2.2.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B5056EC5139ED31E00137B5D /* libopencv_objdetect.2.2.0.dylib */; };
-		B5056ECE139ED31E00137B5D /* libopencv_highgui.2.2.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B5056EC6139ED31E00137B5D /* libopencv_highgui.2.2.0.dylib */; };
-		B5056ECF139ED31E00137B5D /* libopencv_core.2.2.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B5056EC7139ED31E00137B5D /* libopencv_core.2.2.0.dylib */; };
-		B5056ED0139ED31E00137B5D /* libopencv_features2d.2.2.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B5056EC8139ED31E00137B5D /* libopencv_features2d.2.2.0.dylib */; };
-		B5056ED1139ED31E00137B5D /* libopencv_flann.2.2.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B5056EC9139ED31E00137B5D /* libopencv_flann.2.2.0.dylib */; };
 		B566FC5813A427B900E65E3E /* BuildModel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B566FC5613A427B900E65E3E /* BuildModel.cpp */; };
-		B56B182C13A2323E00D736BD /* libopencv_gpu.2.2.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B56B182513A2323E00D736BD /* libopencv_gpu.2.2.0.dylib */; };
-		B56B182D13A2323E00D736BD /* libopencv_legacy.2.2.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B56B182813A2323E00D736BD /* libopencv_legacy.2.2.0.dylib */; };
-		B56B182E13A2323E00D736BD /* libopencv_ml.2.2.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B56B182913A2323E00D736BD /* libopencv_ml.2.2.0.dylib */; };
-		B56B182F13A2323E00D736BD /* libopencv_video.2.2.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B56B182B13A2323E00D736BD /* libopencv_video.2.2.0.dylib */; };
+		D96381E3141067C800E4775A /* libopencv_calib3d.2.3.1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = D96381D6141067C800E4775A /* libopencv_calib3d.2.3.1.dylib */; };
+		D96381E4141067C800E4775A /* libopencv_contrib.2.3.1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = D96381D7141067C800E4775A /* libopencv_contrib.2.3.1.dylib */; };
+		D96381E5141067C800E4775A /* libopencv_core.2.3.1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = D96381D8141067C800E4775A /* libopencv_core.2.3.1.dylib */; };
+		D96381E6141067C800E4775A /* libopencv_features2d.2.3.1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = D96381D9141067C800E4775A /* libopencv_features2d.2.3.1.dylib */; };
+		D96381E7141067C800E4775A /* libopencv_flann.2.3.1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = D96381DA141067C800E4775A /* libopencv_flann.2.3.1.dylib */; };
+		D96381E8141067C800E4775A /* libopencv_gpu.2.3.1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = D96381DB141067C800E4775A /* libopencv_gpu.2.3.1.dylib */; };
+		D96381E9141067C800E4775A /* libopencv_highgui.2.3.1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = D96381DC141067C800E4775A /* libopencv_highgui.2.3.1.dylib */; };
+		D96381EA141067C800E4775A /* libopencv_imgproc.2.3.1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = D96381DD141067C800E4775A /* libopencv_imgproc.2.3.1.dylib */; };
+		D96381EC141067C800E4775A /* libopencv_ml.2.3.1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = D96381DF141067C800E4775A /* libopencv_ml.2.3.1.dylib */; };
+		D96381ED141067C800E4775A /* libopencv_objdetect.2.3.1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = D96381E0141067C800E4775A /* libopencv_objdetect.2.3.1.dylib */; };
+		D96381EE141067C800E4775A /* libopencv_ts.2.3.1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = D96381E1141067C800E4775A /* libopencv_ts.2.3.1.dylib */; };
+		D96381EF141067C800E4775A /* libopencv_video.2.3.1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = D96381E2141067C800E4775A /* libopencv_video.2.3.1.dylib */; };
+		D96381F0141069E900E4775A /* libopencv_legacy.2.3.1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = D96381DE141067C800E4775A /* libopencv_legacy.2.3.1.dylib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -53,6 +54,19 @@
 		B56B182913A2323E00D736BD /* libopencv_ml.2.2.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libopencv_ml.2.2.0.dylib; path = /opt/local/lib/libopencv_ml.2.2.0.dylib; sourceTree = "<absolute>"; };
 		B56B182A13A2323E00D736BD /* libopencv_objdetect.2.2.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libopencv_objdetect.2.2.0.dylib; path = /opt/local/lib/libopencv_objdetect.2.2.0.dylib; sourceTree = "<absolute>"; };
 		B56B182B13A2323E00D736BD /* libopencv_video.2.2.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libopencv_video.2.2.0.dylib; path = /opt/local/lib/libopencv_video.2.2.0.dylib; sourceTree = "<absolute>"; };
+		D96381D6141067C800E4775A /* libopencv_calib3d.2.3.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libopencv_calib3d.2.3.1.dylib; path = "../../../../../Shared/Source/OpenCV-2.3.1/build/lib/libopencv_calib3d.2.3.1.dylib"; sourceTree = "<group>"; };
+		D96381D7141067C800E4775A /* libopencv_contrib.2.3.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libopencv_contrib.2.3.1.dylib; path = "../../../../../Shared/Source/OpenCV-2.3.1/build/lib/libopencv_contrib.2.3.1.dylib"; sourceTree = "<group>"; };
+		D96381D8141067C800E4775A /* libopencv_core.2.3.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libopencv_core.2.3.1.dylib; path = "../../../../../Shared/Source/OpenCV-2.3.1/build/lib/libopencv_core.2.3.1.dylib"; sourceTree = "<group>"; };
+		D96381D9141067C800E4775A /* libopencv_features2d.2.3.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libopencv_features2d.2.3.1.dylib; path = "../../../../../Shared/Source/OpenCV-2.3.1/build/lib/libopencv_features2d.2.3.1.dylib"; sourceTree = "<group>"; };
+		D96381DA141067C800E4775A /* libopencv_flann.2.3.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libopencv_flann.2.3.1.dylib; path = "../../../../../Shared/Source/OpenCV-2.3.1/build/lib/libopencv_flann.2.3.1.dylib"; sourceTree = "<group>"; };
+		D96381DB141067C800E4775A /* libopencv_gpu.2.3.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libopencv_gpu.2.3.1.dylib; path = "../../../../../Shared/Source/OpenCV-2.3.1/build/lib/libopencv_gpu.2.3.1.dylib"; sourceTree = "<group>"; };
+		D96381DC141067C800E4775A /* libopencv_highgui.2.3.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libopencv_highgui.2.3.1.dylib; path = "../../../../../Shared/Source/OpenCV-2.3.1/build/lib/libopencv_highgui.2.3.1.dylib"; sourceTree = "<group>"; };
+		D96381DD141067C800E4775A /* libopencv_imgproc.2.3.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libopencv_imgproc.2.3.1.dylib; path = "../../../../../Shared/Source/OpenCV-2.3.1/build/lib/libopencv_imgproc.2.3.1.dylib"; sourceTree = "<group>"; };
+		D96381DE141067C800E4775A /* libopencv_legacy.2.3.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libopencv_legacy.2.3.1.dylib; path = "../../../../../Shared/Source/OpenCV-2.3.1/build/lib/libopencv_legacy.2.3.1.dylib"; sourceTree = "<group>"; };
+		D96381DF141067C800E4775A /* libopencv_ml.2.3.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libopencv_ml.2.3.1.dylib; path = "../../../../../Shared/Source/OpenCV-2.3.1/build/lib/libopencv_ml.2.3.1.dylib"; sourceTree = "<group>"; };
+		D96381E0141067C800E4775A /* libopencv_objdetect.2.3.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libopencv_objdetect.2.3.1.dylib; path = "../../../../../Shared/Source/OpenCV-2.3.1/build/lib/libopencv_objdetect.2.3.1.dylib"; sourceTree = "<group>"; };
+		D96381E1141067C800E4775A /* libopencv_ts.2.3.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libopencv_ts.2.3.1.dylib; path = "../../../../../Shared/Source/OpenCV-2.3.1/build/lib/libopencv_ts.2.3.1.dylib"; sourceTree = "<group>"; };
+		D96381E2141067C800E4775A /* libopencv_video.2.3.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libopencv_video.2.3.1.dylib; path = "../../../../../Shared/Source/OpenCV-2.3.1/build/lib/libopencv_video.2.3.1.dylib"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -60,18 +74,19 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B5056ECC139ED31E00137B5D /* libopencv_calib3d.2.2.0.dylib in Frameworks */,
-				B5056ECA139ED31E00137B5D /* libopencv_contrib.2.2.0.dylib in Frameworks */,
-				B5056ECF139ED31E00137B5D /* libopencv_core.2.2.0.dylib in Frameworks */,
-				B5056ED0139ED31E00137B5D /* libopencv_features2d.2.2.0.dylib in Frameworks */,
-				B5056ED1139ED31E00137B5D /* libopencv_flann.2.2.0.dylib in Frameworks */,
-				B56B182C13A2323E00D736BD /* libopencv_gpu.2.2.0.dylib in Frameworks */,
-				B5056ECE139ED31E00137B5D /* libopencv_highgui.2.2.0.dylib in Frameworks */,
-				B5056ECB139ED31E00137B5D /* libopencv_imgproc.2.2.0.dylib in Frameworks */,
-				B56B182D13A2323E00D736BD /* libopencv_legacy.2.2.0.dylib in Frameworks */,
-				B56B182E13A2323E00D736BD /* libopencv_ml.2.2.0.dylib in Frameworks */,
-				B5056ECD139ED31E00137B5D /* libopencv_objdetect.2.2.0.dylib in Frameworks */,
-				B56B182F13A2323E00D736BD /* libopencv_video.2.2.0.dylib in Frameworks */,
+				D96381F0141069E900E4775A /* libopencv_legacy.2.3.1.dylib in Frameworks */,
+				D96381E3141067C800E4775A /* libopencv_calib3d.2.3.1.dylib in Frameworks */,
+				D96381E4141067C800E4775A /* libopencv_contrib.2.3.1.dylib in Frameworks */,
+				D96381E5141067C800E4775A /* libopencv_core.2.3.1.dylib in Frameworks */,
+				D96381E6141067C800E4775A /* libopencv_features2d.2.3.1.dylib in Frameworks */,
+				D96381E7141067C800E4775A /* libopencv_flann.2.3.1.dylib in Frameworks */,
+				D96381E8141067C800E4775A /* libopencv_gpu.2.3.1.dylib in Frameworks */,
+				D96381E9141067C800E4775A /* libopencv_highgui.2.3.1.dylib in Frameworks */,
+				D96381EA141067C800E4775A /* libopencv_imgproc.2.3.1.dylib in Frameworks */,
+				D96381EC141067C800E4775A /* libopencv_ml.2.3.1.dylib in Frameworks */,
+				D96381ED141067C800E4775A /* libopencv_objdetect.2.3.1.dylib in Frameworks */,
+				D96381EE141067C800E4775A /* libopencv_ts.2.3.1.dylib in Frameworks */,
+				D96381EF141067C800E4775A /* libopencv_video.2.3.1.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -81,6 +96,19 @@
 		B5056EA6139ED29300137B5D = {
 			isa = PBXGroup;
 			children = (
+				D96381D6141067C800E4775A /* libopencv_calib3d.2.3.1.dylib */,
+				D96381D7141067C800E4775A /* libopencv_contrib.2.3.1.dylib */,
+				D96381D8141067C800E4775A /* libopencv_core.2.3.1.dylib */,
+				D96381D9141067C800E4775A /* libopencv_features2d.2.3.1.dylib */,
+				D96381DA141067C800E4775A /* libopencv_flann.2.3.1.dylib */,
+				D96381DB141067C800E4775A /* libopencv_gpu.2.3.1.dylib */,
+				D96381DC141067C800E4775A /* libopencv_highgui.2.3.1.dylib */,
+				D96381DD141067C800E4775A /* libopencv_imgproc.2.3.1.dylib */,
+				D96381DE141067C800E4775A /* libopencv_legacy.2.3.1.dylib */,
+				D96381DF141067C800E4775A /* libopencv_ml.2.3.1.dylib */,
+				D96381E0141067C800E4775A /* libopencv_objdetect.2.3.1.dylib */,
+				D96381E1141067C800E4775A /* libopencv_ts.2.3.1.dylib */,
+				D96381E2141067C800E4775A /* libopencv_video.2.3.1.dylib */,
 				B5056EB3139ED29300137B5D /* OpenCV */,
 				B5056EB2139ED29300137B5D /* Products */,
 			);
@@ -172,6 +200,9 @@
 /* Begin PBXProject section */
 		B5056EA8139ED29300137B5D /* Project object */ = {
 			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0420;
+			};
 			buildConfigurationList = B5056EAB139ED29300137B5D /* Build configuration list for PBXProject "OpenCVBridge" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
@@ -206,6 +237,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				FRAMEWORK_SEARCH_PATHS = "/Users/Shared/Source/OpenCV-2.3.1/include";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = DEBUG;
@@ -214,9 +246,13 @@
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				HEADER_SEARCH_PATHS = "/Users/Shared/Source/OpenCV-2.3.1/include";
+				LIBRARY_SEARCH_PATHS = "/Users/Shared/Source/OpenCV-2.3.1/build/lib";
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
+				USER_HEADER_SEARCH_PATHS = "/Users/Shared/Source/OpenCV-2.3.1/include";
+				VALID_ARCHS = x86_64;
 			};
 			name = Debug;
 		};
@@ -224,13 +260,18 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				FRAMEWORK_SEARCH_PATHS = "/Users/Shared/Source/OpenCV-2.3.1/include";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				HEADER_SEARCH_PATHS = "/Users/Shared/Source/OpenCV-2.3.1/include";
+				LIBRARY_SEARCH_PATHS = "/Users/Shared/Source/OpenCV-2.3.1/build/lib";
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				SDKROOT = macosx;
+				USER_HEADER_SEARCH_PATHS = "/Users/Shared/Source/OpenCV-2.3.1/include";
+				VALID_ARCHS = x86_64;
 			};
 			name = Release;
 		};
@@ -239,18 +280,25 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				COPY_PHASE_STRIP = NO;
-				FRAMEWORK_SEARCH_PATHS = /opt/local/include;
+				FRAMEWORK_SEARCH_PATHS = (
+					"/Users/Shared/Source/OpenCV-2.3.1/include",
+					/opt/local/include,
+				);
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
-				HEADER_SEARCH_PATHS = /opt/local/include;
+				HEADER_SEARCH_PATHS = (
+					"/Users/Shared/Source/OpenCV-2.3.1/include",
+					/opt/local/include,
+				);
 				INSTALL_PATH = "@executable_path/../Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					/opt/local/lib,
+					"\"$(SRCROOT)/../../../../../Shared/Source/OpenCV-2.3.1/build/lib\"",
 				);
-				PRIVATE_HEADERS_FOLDER_PATH = /opt/local/include;
+				PRIVATE_HEADERS_FOLDER_PATH = "/Users/Shared/Source/OpenCV-2.3.1/include";
 				PRODUCT_NAME = OpenCVBridge;
-				PUBLIC_HEADERS_FOLDER_PATH = /opt/local/include;
+				PUBLIC_HEADERS_FOLDER_PATH = "/Users/Shared/Source/OpenCV-2.3.1/include";
 				VALID_ARCHS = x86_64;
 			};
 			name = Debug;
@@ -261,19 +309,26 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				FRAMEWORK_SEARCH_PATHS = /opt/local/include;
+				FRAMEWORK_SEARCH_PATHS = (
+					"/Users/Shared/Source/OpenCV-2.3.1/include",
+					/opt/local/include,
+				);
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = RELEASE;
-				HEADER_SEARCH_PATHS = /opt/local/include;
+				HEADER_SEARCH_PATHS = (
+					"/Users/Shared/Source/OpenCV-2.3.1/include",
+					/opt/local/include,
+				);
 				INSTALL_PATH = "@executable_path/../Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					/opt/local/lib,
+					"\"$(SRCROOT)/../../../../../Shared/Source/OpenCV-2.3.1/build/lib\"",
 				);
 				ONLY_ACTIVE_ARCH = YES;
-				PRIVATE_HEADERS_FOLDER_PATH = /opt/local/include;
+				PRIVATE_HEADERS_FOLDER_PATH = "/Users/Shared/Source/OpenCV-2.3.1/include";
 				PRODUCT_NAME = OpenCVBridge;
-				PUBLIC_HEADERS_FOLDER_PATH = /opt/local/include;
+				PUBLIC_HEADERS_FOLDER_PATH = "/Users/Shared/Source/OpenCV-2.3.1/include";
 				VALID_ARCHS = x86_64;
 			};
 			name = Release;

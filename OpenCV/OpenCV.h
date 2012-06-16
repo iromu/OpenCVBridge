@@ -23,7 +23,11 @@ class OpenCV
 {
 public:
     //std::vector<cv::KeyPoint> keypoints1;
-    //cv::Mat descriptors1;
+    //cv::Mat descriptors1;∫
+    
+    
+    
+    ~OpenCV();
     
     void init();
     
@@ -34,9 +38,9 @@ public:
     void initDescriptorMatcher(const char *,const char *);
     
     
-    void matchFeatures(const char *,const char *);
+    unsigned long matchFeatures(const char *,const char *);
     
-    void matchFeatures(const char *,const char *,const char *);
+    unsigned long matchFeatures(const char *,const char *,const char *);
     
     unsigned long match_check(const char *);
     
@@ -47,7 +51,8 @@ public:
     
     unsigned long feature_check(const char *);
     void buildPointModel(std::vector<std::string>);
-    
+public:
+    bool drawProgress;
 };
 
 #pragma GCC visibility pop

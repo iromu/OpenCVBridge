@@ -33,7 +33,7 @@ using namespace std;
 
 #define DRAW 1
 #define DRAW_RICH_KEYPOINTS_MODE    0
-#define DRAW_OUTLIERS_MODE           1
+#define DRAW_OUTLIERS_MODE           0
 
 //#define DEBUG
 
@@ -59,8 +59,14 @@ string algStringCode;
 std::vector<KeyPoint> keypoints1;
 Mat descriptors1;
 
+OpenCV::~OpenCV()
+{
+   drawProgress=false;
+}
+
 void OpenCV::init()
 {    
+    //drawProgress=false;
     //init("SIFT","SIFT");
 };
 
@@ -87,17 +93,17 @@ void OpenCV::initDescriptorMatcher(const char *  dd,const char *  ff)
 
 
 
-void OpenCV::matchFeatures(const char *  ii,const char *  jj)
+unsigned long OpenCV::matchFeatures(const char *  ii,const char *  jj)
 
 {
     std::stringstream output;
     output << ii<<".matches.xml";
-    matchFeatures(ii, jj,output.str().c_str());
+    return matchFeatures(ii, jj,output.str().c_str());
 }
-void OpenCV::matchFeatures(const char *  ii,const char *  jj,const char *  dest)
+unsigned long OpenCV::matchFeatures(const char *  ii,const char *  jj,const char *  dest)
 {
     
-    //  try{
+    //try{
     
     int ransacReprojThreshold=8;//3 8, 1-10
     
@@ -192,61 +198,69 @@ void OpenCV::matchFeatures(const char *  ii,const char *  jj,const char *  dest)
     
     delete theObj;
     
-#if DRAW
-    Mat drawImg;
-    Mat img1=imread(filename1, CV_LOAD_IMAGE_GRAYSCALE);
-    Mat img2=imread(filename2, CV_LOAD_IMAGE_GRAYSCALE);
-    
-    
-    
-    if( !H12.empty() ) // filter outliers
-    {
-        vector<char> matchesMask( filteredMatches.size(), 0 );
-        vector<Point2f> points1; KeyPoint::convert(iKeypoints, points1, queryIdxs);
-        vector<Point2f> points2; KeyPoint::convert(jKeypoints, points2, trainIdxs);
-        Mat points1t; perspectiveTransform(Mat(points1), points1t, H12);
-        for( size_t i1 = 0; i1 < points1.size(); i1++ )
-        {
-            if( norm(points2[i1] - points1t.at<Point2f>((int)i1,0)) < 4 ) // inlier
-                matchesMask[i1] = 1;
-        }
-        // draw inliers
-        drawMatches( img1, iKeypoints, img2, jKeypoints, filteredMatches, drawImg, CV_RGB(0, 255, 0), CV_RGB(0, 0, 255), matchesMask
-#if DRAW_RICH_KEYPOINTS_MODE
-                    , DrawMatchesFlags::DRAW_RICH_KEYPOINTS
-#endif
-                    );
+    //#if DRAW
+    if(drawProgress){
+        Mat drawImg;
+        Mat img1=imread(filename1, CV_LOAD_IMAGE_GRAYSCALE);
+        Mat img2=imread(filename2, CV_LOAD_IMAGE_GRAYSCALE);
         
-#if DRAW_OUTLIERS_MODE
-        // draw outliers
-        for( size_t i1 = 0; i1 < matchesMask.size(); i1++ )
-            matchesMask[i1] = !matchesMask[i1];
-        drawMatches( img1, iKeypoints, img2, jKeypoints, filteredMatches, drawImg, CV_RGB(0, 0, 255), CV_RGB(255, 0, 0), matchesMask,
-                    DrawMatchesFlags::DRAW_OVER_OUTIMG | DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS );
+        
+        
+        if( !H12.empty() ) // filter outliers
+        {
+            vector<char> matchesMask( filteredMatches.size(), 0 );
+            vector<Point2f> points1; KeyPoint::convert(iKeypoints, points1, queryIdxs);
+            vector<Point2f> points2; KeyPoint::convert(jKeypoints, points2, trainIdxs);
+            Mat points1t; perspectiveTransform(Mat(points1), points1t, H12);
+            for( size_t i1 = 0; i1 < points1.size(); i1++ )
+            {
+                if( norm(points2[i1] - points1t.at<Point2f>((int)i1,0)) < 4 ) // inlier
+                    matchesMask[i1] = 1;
+            }
+            // draw inliers
+            drawMatches( img1, iKeypoints, img2, jKeypoints, filteredMatches, drawImg, CV_RGB(0, 255, 0), CV_RGB(0, 0, 255), matchesMask
+#if DRAW_RICH_KEYPOINTS_MODE
+                        , DrawMatchesFlags::DRAW_RICH_KEYPOINTS
 #endif
+                        );
+            
+#if DRAW_OUTLIERS_MODE
+            // draw outliers
+            for( size_t i1 = 0; i1 < matchesMask.size(); i1++ )
+                matchesMask[i1] = !matchesMask[i1];
+            drawMatches( img1, iKeypoints, img2, jKeypoints, filteredMatches, drawImg, CV_RGB(0, 0, 255), CV_RGB(255, 0, 0), matchesMask,
+                        DrawMatchesFlags::DRAW_OVER_OUTIMG | DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS );
+#endif
+        }
+        else
+            drawMatches( img1, iKeypoints, img2, jKeypoints, filteredMatches, drawImg );
+        
+        
+        //    const int scale = 2;
+        //cv::resize(const cv::Mat &src, <#cv::Mat &dst#>, <#Size dsize#>)
+        //CvMat* cvmat = drawImg;
+        //IplImage *  gray_image = cvmat; 
+        //IplImage *  small_image   = cvCreateImage(cvSize (gray_image->width / scale, gray_image->height / scale), IPL_DEPTH_8U, 1);
+        Mat small_image; 
+        
+        cv::resize(drawImg, small_image, img1.size());
+        
+        imshow( winName, small_image );
+        //#endif 
     }
-    else
-        drawMatches( img1, iKeypoints, img2, jKeypoints, filteredMatches, drawImg );
     
     
-    //    const int scale = 2;
-    //cv::resize(const cv::Mat &src, <#cv::Mat &dst#>, <#Size dsize#>)
-    //CvMat* cvmat = drawImg;
-    //IplImage *  gray_image = cvmat; 
-    //IplImage *  small_image   = cvCreateImage(cvSize (gray_image->width / scale, gray_image->height / scale), IPL_DEPTH_8U, 1);
-    Mat small_image; 
     
-    cv::resize(drawImg, small_image, img1.size());
-    
-    imshow( winName, small_image );
-#endif       
-    // }
-    /*
+    return filteredMatches.size();
+    /*  
+     }
+     
      catch (Exception theException) 
      {
-     cout << "OPENCV_MATCH_UNKNOWN_EXCEPTION: " << theException;
-     }*/
-    /*  catch(...) {
+     cout << "OPENCV_MATCH_EXCEPTION: ";
+     theException.formatMessage();
+     }
+     catch(...) {
      cout << "OPENCV_MATCH_UNKNOWN_EXCEPTION" << endl;
      void* callstack[128];
      int i, frames = backtrace(callstack, 128);
@@ -256,6 +270,7 @@ void OpenCV::matchFeatures(const char *  ii,const char *  jj,const char *  dest)
      }
      free(strs);
      }*/
+    return 0;
     
 };
 
@@ -314,11 +329,11 @@ unsigned long OpenCV::match_check(const char * filename)
         for (; it != it_end; ++it)
         {
             //            cv::read(fs, <#double &value#>, <#double default_value#>)
-           
+            
             /*A = (int)*it ["A"];
-            X = (double)*it ["X"];
-            id = (string)*it ["id"];
- */
+             X = (double)*it ["X"];
+             id = (string)*it ["id"];
+             */
             size++;
         }
         
@@ -399,10 +414,14 @@ unsigned long OpenCV::feature_detect( const char *  filename)
         //cv::FileStorage->flush(output);
         //cvFlushSeqWriter(<#CvSeqWriter *writer#>)
         //#ifdef DEBUG
-        Mat outImg;
-        drawKeypoints( img, keypoints, outImg);
-        namedWindow(winName);
-        imshow( winName, outImg );
+        //#if DRAW
+        
+        if(drawProgress){
+            Mat outImg;
+            drawKeypoints( img, keypoints, outImg);
+            namedWindow(winName);
+            imshow( winName, outImg );
+        }
         //#endif
         
         
@@ -411,6 +430,7 @@ unsigned long OpenCV::feature_detect( const char *  filename)
     catch(...) {
         cout << "OPENCV_FEATURE_UNKNOWN_EXCEPTION" << endl;
     }
+    return 0;
 };
 
 
